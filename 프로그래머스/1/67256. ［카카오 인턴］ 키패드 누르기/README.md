@@ -1,191 +1,148 @@
-# [level 1] [카카오 인턴] 키패드 누르기 - 67256 
+# 구현 방법
 
-[문제 링크](https://school.programmers.co.kr/learn/courses/30/lessons/67256?language=java) 
+## 초기 구현 방법
 
-### 성능 요약
+- 패드에 따른 좌표값 배정
+- 각각의 패드 좌표와 손 위지 차표를 피타고라스 정의에 의한 길이 비교
+- 1,4,7왼손 // 3,6,7오른손 // 나머지 각 손의 거리 및 손잡이에 따라 배정
+```java
+package PressKeyPad;
 
-메모리: 81.3 MB, 시간: 0.53 ms
+public class Solution {
 
-### 구분
+    public static void main(String[] args) {
+        String hand = "right";
+        int[] numbers = {1,3,4,5,8,2,1,4,5,9,5};
+        String answer = "";
+        int[][] pad = {{0, 1}, {3, 0}, {3, 1}, {3, 2}, {2, 0}, {2, 1}, {2, 2}, {1, 0}, {1, 1}, {1, 2}, {0, 0}, {0, 2}};//0,1,2,3,4,5,6,7,8,9,*,#
+        answer = getAnswer(numbers, pad, hand);
+        System.out.println(answer);
+    }
 
-코딩테스트 연습 > 2020 카카오 인턴십
+    private static String getAnswer(int[] numbers, int[][] pad, String hand) {
+        StringBuilder answer = new StringBuilder();
+        // 좌표위치 초기화
+        int rx = pad[10][0];
+        int ry = pad[10][1];
+        int lx = pad[11][0];
+        int ly = pad[11][1];
 
-### 채점결과
+        int rDistance=0;
+        int lDistance=0;
 
-정확성: 100.0<br/>합계: 100.0 / 100.0
+        for (int i : numbers) { //거리 피타고라스의 정의로 구함
+            rDistance = (rx - pad[i][0]) * (rx - pad[i][0]) + (ry - pad[i][1]) * (ry - pad[i][1]);
+            lDistance = (lx - pad[i][0]) * (lx - pad[i][0]) + (ly - pad[i][1]) * (ly - pad[i][1]);
+            if(i == 1 || i == 4 || i == 7) {
+                answer.append("L");
+                lx = pad[i][0];
+                ly = pad[i][1];
+            } else if (i == 3 || i == 6 || i == 9) {
+                answer.append("R");
+                rx = pad[i][0];
+                ry = pad[i][1];
+            }
+            else{
+                if (rDistance == lDistance) {
+                    if (hand.equals("right")) {
+                        answer.append("R");
+                        rx = pad[i][0];
+                        ry = pad[i][1];
+                    } else {
+                        answer.append("L");
+                        lx = pad[i][0];
+                        ly = pad[i][1];
+                    }
+                } else if (rDistance > lDistance) {
+                    answer.append("L");
+                    lx = pad[i][0];
+                    ly = pad[i][1];
+                } else if (rDistance < lDistance) {
+                    answer.append("R");
+                    rx = pad[i][0];
+                    ry = pad[i][1];
+                }
+            }
+        }
+        return answer.toString();
+    }
+}
+```
 
-### 제출 일자
+## 문제점
 
-2023년 11월 3일 11:25:32
+## ** 문제에서 다음과 같이 언급함 **
+"엄지손가락은 상하좌우 4가지 방향으로만 이동할 수 있으며 키패드 이동 한 칸은 거리로 1에 해당합니다."
+<br>
+<br>
+ 해당 문구를 통해 피타고라스의 정의가 아닌 "맨하탄 거리"를 이용하여 문제를 풀어야 한다는 것을 알아야 통과 할 수 있음
 
-### 문제 설명
+## 맨하탄 거리란?
+<br>
+<CENTER><img src="img_1.png" width="50%"></CENTER>
+<br>
+이미지의 블록 처럼 각 위치의 x,y값 차이의 절대값을 이용한 거리 계산법이다.
 
-<p>스마트폰 전화 키패드의 각 칸에 다음과 같이 숫자들이 적혀 있습니다.</p>
+피타고라스의 정의를 이용한 유클리드 계산법에 의하면 최단거리는 초록선 선 이지만, 맨하탄 거리에 따르면 빨강, 노랑, 파랑 모두 같은 최단거리이다.
 
-<p><img src="https://grepp-programmers.s3.ap-northeast-2.amazonaws.com/files/production/4b69a271-5f4a-4bf4-9ebf-6ebed5a02d8d/kakao_phone1.png" title="" alt="kakao_phone1.png"></p>
+맨하탄 거리기법을 이용하면 문제에서 요구한 상하좌우 4가지 방향으로'만' 이동할 수 있다는 요건을 만족할 수 있다.
 
-<p>이 전화 키패드에서 왼손과 오른손의 엄지손가락만을 이용해서 숫자만을 입력하려고 합니다.<br>
-맨 처음 왼손 엄지손가락은 <code>*</code> 키패드에 오른손 엄지손가락은 <code>#</code> 키패드 위치에서 시작하며, 엄지손가락을 사용하는 규칙은 다음과 같습니다.</p>
+혹시 문제를 풀다가 오류가 난다면 다음과 같이 시도해 보자
 
-<ol>
-<li>엄지손가락은 상하좌우 4가지 방향으로만 이동할 수 있으며 키패드 이동 한 칸은 거리로 1에 해당합니다.</li>
-<li>왼쪽 열의 3개의 숫자 <code>1</code>, <code>4</code>, <code>7</code>을 입력할 때는 왼손 엄지손가락을 사용합니다.</li>
-<li>오른쪽 열의 3개의 숫자 <code>3</code>, <code>6</code>, <code>9</code>를 입력할 때는 오른손 엄지손가락을 사용합니다.</li>
-<li>가운데 열의 4개의 숫자 <code>2</code>, <code>5</code>, <code>8</code>, <code>0</code>을 입력할 때는 두 엄지손가락의 현재 키패드의 위치에서 더 가까운 엄지손가락을 사용합니다.<br>
-4-1. 만약 두 엄지손가락의 거리가 같다면, 오른손잡이는 오른손 엄지손가락, 왼손잡이는 왼손 엄지손가락을 사용합니다.</li>
-</ol>
+## 맨하탄 적용 코드
+```java
+class Solution {
+    public String solution(int[] numbers, String hand) {
+        String answer = "";
+        int[][] pad = {{0, 1}, {3, 0}, {3, 1}, {3, 2}, {2, 0}, {2, 1}, {2, 2}, {1, 0}, {1, 1}, {1, 2}, {0, 0}, {0, 2}};//0,1,2,3,4,5,6,7,8,9,*,#
+        answer = getAnswer(numbers, pad, hand);
+        return answer;
+    }
+   private static String getAnswer(int[] numbers, int[][] pad, String hand) {
+        StringBuilder answer = new StringBuilder();
+        int rx = pad[10][0];
+        int ry = pad[10][1];
+        int lx = pad[11][0];
+        int ly = pad[11][1];
 
-<p>순서대로 누를 번호가 담긴 배열 numbers, 왼손잡이인지 오른손잡이인 지를 나타내는 문자열 hand가 매개변수로 주어질 때, 각 번호를 누른 엄지손가락이 왼손인 지 오른손인 지를 나타내는 연속된 문자열 형태로 return 하도록 solution 함수를 완성해주세요.</p>
+        int rDistance;
+        int lDistance;
 
-<h5><strong>[제한사항]</strong></h5>
-
-<ul>
-<li>numbers 배열의 크기는 1 이상 1,000 이하입니다.</li>
-<li>numbers 배열 원소의 값은 0 이상 9 이하인 정수입니다.</li>
-<li>hand는 <code>"left"</code> 또는 <code>"right"</code> 입니다.
-
-<ul>
-<li><code>"left"</code>는 왼손잡이, <code>"right"</code>는 오른손잡이를 의미합니다.</li>
-</ul></li>
-<li>왼손 엄지손가락을 사용한 경우는 <code>L</code>, 오른손 엄지손가락을 사용한 경우는 <code>R</code>을 순서대로 이어붙여 문자열 형태로 return 해주세요.</li>
-</ul>
-
-<hr>
-
-<h5><strong>입출력 예</strong></h5>
-<table class="table">
-        <thead><tr>
-<th>numbers</th>
-<th>hand</th>
-<th>result</th>
-</tr>
-</thead>
-        <tbody><tr>
-<td>[1, 3, 4, 5, 8, 2, 1, 4, 5, 9, 5]</td>
-<td><code>"right"</code></td>
-<td><code>"LRLLLRLLRRL"</code></td>
-</tr>
-<tr>
-<td>[7, 0, 8, 2, 8, 3, 1, 5, 7, 6, 2]</td>
-<td><code>"left"</code></td>
-<td><code>"LRLLRRLLLRR"</code></td>
-</tr>
-<tr>
-<td>[1, 2, 3, 4, 5, 6, 7, 8, 9, 0]</td>
-<td><code>"right"</code></td>
-<td><code>"LLRLLRLLRL"</code></td>
-</tr>
-</tbody>
-      </table>
-<h5><strong>입출력 예에 대한 설명</strong></h5>
-
-<p><strong>입출력 예 #1</strong></p>
-
-<p>순서대로 눌러야 할 번호가 [1, 3, 4, 5, 8, 2, 1, 4, 5, 9, 5]이고, 오른손잡이입니다.</p>
-<table class="table">
-        <thead><tr>
-<th>왼손 위치</th>
-<th>오른손 위치</th>
-<th>눌러야 할 숫자</th>
-<th>사용한 손</th>
-<th>설명</th>
-</tr>
-</thead>
-        <tbody><tr>
-<td>*</td>
-<td>#</td>
-<td>1</td>
-<td>L</td>
-<td>1은 왼손으로 누릅니다.</td>
-</tr>
-<tr>
-<td>1</td>
-<td>#</td>
-<td>3</td>
-<td>R</td>
-<td>3은 오른손으로 누릅니다.</td>
-</tr>
-<tr>
-<td>1</td>
-<td>3</td>
-<td>4</td>
-<td>L</td>
-<td>4는 왼손으로 누릅니다.</td>
-</tr>
-<tr>
-<td>4</td>
-<td>3</td>
-<td>5</td>
-<td>L</td>
-<td>왼손 거리는 1, 오른손 거리는 2이므로 왼손으로 5를 누릅니다.</td>
-</tr>
-<tr>
-<td>5</td>
-<td>3</td>
-<td>8</td>
-<td>L</td>
-<td>왼손 거리는 1, 오른손 거리는 3이므로 왼손으로 8을 누릅니다.</td>
-</tr>
-<tr>
-<td>8</td>
-<td>3</td>
-<td>2</td>
-<td>R</td>
-<td>왼손 거리는 2, 오른손 거리는 1이므로 오른손으로 2를 누릅니다.</td>
-</tr>
-<tr>
-<td>8</td>
-<td>2</td>
-<td>1</td>
-<td>L</td>
-<td>1은 왼손으로 누릅니다.</td>
-</tr>
-<tr>
-<td>1</td>
-<td>2</td>
-<td>4</td>
-<td>L</td>
-<td>4는 왼손으로 누릅니다.</td>
-</tr>
-<tr>
-<td>4</td>
-<td>2</td>
-<td>5</td>
-<td>R</td>
-<td>왼손 거리와 오른손 거리가 1로 같으므로, 오른손으로 5를 누릅니다.</td>
-</tr>
-<tr>
-<td>4</td>
-<td>5</td>
-<td>9</td>
-<td>R</td>
-<td>9는 오른손으로 누릅니다.</td>
-</tr>
-<tr>
-<td>4</td>
-<td>9</td>
-<td>5</td>
-<td>L</td>
-<td>왼손 거리는 1, 오른손 거리는 2이므로 왼손으로 5를 누릅니다.</td>
-</tr>
-<tr>
-<td>5</td>
-<td>9</td>
-<td>-</td>
-<td>-</td>
-<td></td>
-</tr>
-</tbody>
-      </table>
-<p>따라서 <code>"LRLLLRLLRRL"</code>를 return 합니다.</p>
-
-<p><strong>입출력 예 #2</strong></p>
-
-<p>왼손잡이가 [7, 0, 8, 2, 8, 3, 1, 5, 7, 6, 2]를 순서대로 누르면 사용한 손은 <code>"LRLLRRLLLRR"</code>이 됩니다.</p>
-
-<p><strong>입출력 예 #3</strong></p>
-
-<p>오른손잡이가 [1, 2, 3, 4, 5, 6, 7, 8, 9, 0]를 순서대로 누르면 사용한 손은 <code>"LLRLLRLLRL"</code>이 됩니다.</p>
-
-
-> 출처: 프로그래머스 코딩 테스트 연습, https://school.programmers.co.kr/learn/challenges
+        for (int i : numbers) {
+            rDistance = Math.abs(rx - pad[i][0]) + Math.abs(ry - pad[i][1]);
+            lDistance = Math.abs(lx - pad[i][0]) + Math.abs(ly - pad[i][1]);
+            if(i == 1 || i == 4 || i == 7) {
+                answer.append("L");
+                lx = pad[i][0];
+                ly = pad[i][1];
+            } else if (i == 3 || i == 6 || i == 9) {
+                answer.append("R");
+                rx = pad[i][0];
+                ry = pad[i][1];
+            }
+            else{
+                if (rDistance == lDistance) {
+                    if (hand.equals("right")) {
+                        answer.append("R");
+                        rx = pad[i][0];
+                        ry = pad[i][1];
+                    } else {
+                        answer.append("L");
+                        lx = pad[i][0];
+                        ly = pad[i][1];
+                    }
+                } else if (rDistance > lDistance) {
+                    answer.append("L");
+                    lx = pad[i][0];
+                    ly = pad[i][1];
+                } else if (rDistance < lDistance) {
+                    answer.append("R");
+                    rx = pad[i][0];
+                    ry = pad[i][1];
+                }
+            }
+        }
+        return answer.toString();
+    }
+}
+```
