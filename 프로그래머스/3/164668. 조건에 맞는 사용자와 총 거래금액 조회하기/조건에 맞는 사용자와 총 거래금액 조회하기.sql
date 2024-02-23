@@ -1,0 +1,8 @@
+-- 코드를 입력하세요
+SELECT USER_ID, NICKNAME, sum(PRICE)TOTAL_SALES
+FROM USED_GOODS_BOARD as b, USED_GOODS_USER as u
+WHERE b.WRITER_ID = u.USER_ID
+and STATUS = 'DONE'
+group by 1
+having TOTAL_SALES >= 700000
+order by 3
