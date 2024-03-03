@@ -65,5 +65,24 @@
 <li>예제 2번의 <code>n</code>은 10으로 짝수입니다. 10 이하의 모든 양의 짝수는 2, 4, 6, 8, 10이고 이들의 제곱의 합인 2<sup>2</sup> + 4<sup>2</sup> + 6<sup>2</sup> + 8<sup>2</sup> + 10<sup>2</sup> = 4 + 16 + 36 + 64 + 100 = 220을 return 합니다.</li>
 </ul>
 
+<hr>
+
+### 추가 학습 답안
+
+```python
+def solution(n):
+    return sum(x ** (2 - x % 2) for x in range(n + 1) if n % 2 == x % 2)
+```
+
+```python
+def solution(n):
+    if n%2:
+        return sum(range(1,n+1,2))
+    return sum([i*i for i in range(2,n+1,2)])
+```
+        
+        
+<hr>
+
 
 > 출처: 프로그래머스 코딩 테스트 연습, https://school.programmers.co.kr/learn/challenges
