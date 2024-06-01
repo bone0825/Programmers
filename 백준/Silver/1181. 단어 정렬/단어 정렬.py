@@ -1,12 +1,1 @@
-T = int(input())
-text = []
-for _ in range(T):
-    text.append(input())
-
-text= set(text)
-text = list(text)
-text.sort()
-text.sort(key=len)
-
-for i in text :
-    print(i)
+s=sorted;print(*s(s({*open(0)})[1:],key=len),sep='')
