@@ -7,7 +7,7 @@
 select I.ANIMAL_ID, I.NAME
 from ANIMAL_INS I
 where exists (select 'x'
-             from ANIMAL_OUTS
-             where ANIMAL_ID = I.ANIMAL_ID and
-                I.DATETIME > DATETIME)
+             from ANIMAL_OUTS o
+             where o.ANIMAL_ID = I.ANIMAL_ID and
+                I.DATETIME > o.DATETIME)
 order by I.DATETIME
